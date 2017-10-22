@@ -1,6 +1,5 @@
 package com.garreffd.outbreak;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
@@ -28,8 +27,8 @@ public class Ball {
     private Circle circle;
     //Collision variables. This prevents multiple collisions after consecutive frames.
     private boolean collision;
-    private final static float COLLISION_RESET_TIMER = 0.25f;
-    
+    private final static float COLLISION_RESET_TIMER = 0.05f;
+
     public Ball(Viewport viewport, Player player){
         this.viewport = viewport;
         this.player = player;
@@ -91,7 +90,7 @@ public class Ball {
 
     private void checkPlayerCollision(){
         //If the player collids with ball, reverse the movement.
-        if(Intersector.overlaps(circle,player.getRectangleCollider()) && !collision){
+        if(Intersector.overlaps(circle,player.getPlayerCollider()) && !collision){
             //Set collision to true to prevent multiple collisions.
             collision = true;
             velocity.y *= REVERSE_MOVEMENT;
