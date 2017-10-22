@@ -1,11 +1,14 @@
 package com.garreffd.outbreak;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.sun.javafx.geom.Shape;
 
 import static com.garreffd.outbreak.Constants.*;
 
@@ -29,6 +32,8 @@ public class Ball {
     private boolean collision;
     private final static float COLLISION_RESET_TIMER = 0.05f;
 
+
+
     public Ball(Viewport viewport, Player player){
         this.viewport = viewport;
         this.player = player;
@@ -40,6 +45,7 @@ public class Ball {
         velocity = new Vector2(0f, BALL_INITIAL_VELOCITY_Y);
         circle = new Circle(position.x, position.y, BALL_RADIUS);
         collision = false;
+
     }
 
     //Draws the ball and sets the colour. Called in the Screen render function.
@@ -56,7 +62,7 @@ public class Ball {
         //Check if Ball has hit any bounds (north,west,east) or if the south bound is hit the game is over.
         checkBounds();
         //Checks if ball collided with player.
-        checkPlayerCollision();
+        checkPlayerCollision(player.getPlayerCollider(), false);
 
         //Adds velocity to the position vector.
         addMovement(delta);
@@ -88,12 +94,28 @@ public class Ball {
         }
     }
 
-    private void checkPlayerCollision(){
-        //If the player collids with ball, reverse the movement.
-        if(Intersector.overlaps(circle,player.getPlayerCollider()) && !collision){
+    public boolean checkPlayerCollision(Rectangle rectangle, boolean isBrick){
+        //If the player collides with ball, reverse the movement.
+        if(Intersector.overlaps(circle,rectangle) && !collision){
             //Set collision to true to prevent multiple collisions.
             collision = true;
+            //By default if the player is hit or the bottom/top of a brick is hit, reverse movement.
             velocity.y *= REVERSE_MOVEMENT;
+            //If we hit a brick, a few things differ.
+            //1: If we hit any side, the ball should continue its trajectory. ie no change in velocity.y
+            //2: If we hit the bottom/top, the velocity.x should not change in direction.
+            if(isBrick){
+                //Check if the side was hit.
+                if(position.y > rectangle.y){
+                    velocity.y *= REVERSE_MOVEMENT;
+                    velocity.x *= REVERSE_MOVEMENT;
+                }
+                //Reset Collisions allows for collisions to occur again after a interval.
+                resetCollision(COLLISION_RESET_TIMER);
+                //Since we are returning here, we must call resetCollision again.
+                return true;
+            }
+
             //If the ball hits the west area of the player, move the ball west.
             if(position.x < player.getPosition().x + PLAYER_WIDTH / 2){
                 velocity.x = -BALL_INITIAL_VELOCITY_X;
@@ -104,7 +126,9 @@ public class Ball {
             }
             //Reset Collisions allows for collisions to occur again after a interval.
             resetCollision(COLLISION_RESET_TIMER);
+        return true;
         }
+        return false;
     }
 
     private void addMovement(float delta){

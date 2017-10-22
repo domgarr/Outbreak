@@ -24,6 +24,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
 
     Player player;
     Ball ball;
+    Bricks bricks;
 
     public OutbreakScreen(OutbreakGame game){
         this.game = game;
@@ -58,6 +59,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
          */
         player = new Player(outbreakViewport);
         ball = new Ball(outbreakViewport, player);
+        bricks = new Bricks(outbreakViewport, 5, 10);
 
         /*
         InputProcessor recieves input event from the keyboard and touch screen.
@@ -74,6 +76,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
     public void render(float delta) {
         player.update(delta);
         ball.update(delta);
+        bricks.update(ball);
 
         /*
         Calling apply with no parameters will apply the view port without centering the camera.
@@ -102,6 +105,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
         //Draws player on screen.
         player.render(renderer);
         ball.render(renderer);
+        bricks.render(renderer);
 
     }
 
@@ -115,6 +119,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
 
         player.init();
         ball.init();
+        bricks.init();
     }
     /*
     On android, called when Home is pressed or interruption occurs such as a phoen call.
