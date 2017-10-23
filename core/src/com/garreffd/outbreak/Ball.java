@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Timer;
@@ -17,7 +18,7 @@ import static com.garreffd.outbreak.Constants.*;
  */
 
 public class Ball {
-    public static final float REVERSE_MOVEMENT = -1;
+    private float REVERSE_MOVEMENT = -1;
 
     private Player player;
 
@@ -30,13 +31,16 @@ public class Ball {
     private Circle circle;
     //Collision variables. This prevents multiple collisions after consecutive frames.
     private boolean collision;
-    private final static float COLLISION_RESET_TIMER = 0.05f;
+    private final static float COLLISION_RESET_TIMER = 0.10f;
+
 
 
 
     public Ball(Viewport viewport, Player player){
         this.viewport = viewport;
         this.player = player;
+
+
     }
 
     //Sets the Ball to be placed in the middle of the screen. The velocity is set to project upwards on start.
@@ -73,6 +77,7 @@ public class Ball {
     If the upper Y boundary is hit, the velocity.y is reversed.
     If the left or right X boundary is hit, the velocity.x is reversed.
     If the lower Y boundary is surpassed, the game is over.
+
     */
 
     private void checkBounds(){
@@ -82,6 +87,7 @@ public class Ball {
             velocity.y *= REVERSE_MOVEMENT;
             resetCollision(COLLISION_RESET_TIMER);
         }
+
         // If the ball hits any walls, reverse velocity.x
         else if( (position.x - BALL_RADIUS < 0 || position.x + BALL_RADIUS > viewport.getWorldWidth()) && !collision) {
             collision = true;
@@ -93,36 +99,58 @@ public class Ball {
             init();
         }
     }
-
+    /*
+    Checks if the ball collides with player or bricks.
+    Note to self: This method does too much, some lines should be extracted
+    to make for better understanding.
+    Returns true if collision occurs, false otherise.
+    */
     public boolean checkPlayerCollision(Rectangle rectangle, boolean isBrick){
         //If the player collides with ball, reverse the movement.
         if(Intersector.overlaps(circle,rectangle) && !collision){
             //Set collision to true to prevent multiple collisions.
             collision = true;
-            //By default if the player is hit or the bottom/top of a brick is hit, reverse movement.
-            velocity.y *= REVERSE_MOVEMENT;
+
+            //Sets the x and y ratio variables proportionally to the distance from the center of the player.
+            float yMovementSpeedRatio = player.getCollidingTrajectory(position.x);
+            float xMovementSpeedRatio = 1 - yMovementSpeedRatio;
+
+            /*
+            Added velocity.Y value to be proportional to where the player hits the ball.
+            If the ball was moving upwards with a positive velocity, make it negative.
+            If it was negative make it positive.
+             */
+            if(velocity.y > 0) {
+                velocity.y = yMovementSpeedRatio * BALL_MOVEMENT_SPEED * REVERSE_MOVEMENT;
+            }else{
+                velocity.y = yMovementSpeedRatio * BALL_MOVEMENT_SPEED ;
+            }
             //If we hit a brick, a few things differ.
             //1: If we hit any side, the ball should continue its trajectory. ie no change in velocity.y
             //2: If we hit the bottom/top, the velocity.x should not change in direction.
             if(isBrick){
                 //Check if the side was hit.
-                if(position.y > rectangle.y){
-                    velocity.y *= REVERSE_MOVEMENT;
-                    velocity.x *= REVERSE_MOVEMENT;
+                if(isHittingSideOfBrick(rectangle)){
+                        /* This undo's the change of direction done above, because if the side
+                        of a brick was hit, it should still continue to move in the same direction.
+                        about the y-axis.
+                        */
+                        velocity.y *= REVERSE_MOVEMENT;
+                        //Although the x-axis differs, there will always be a change in direction.
+                        velocity.x *= REVERSE_MOVEMENT;
                 }
                 //Reset Collisions allows for collisions to occur again after a interval.
                 resetCollision(COLLISION_RESET_TIMER);
                 //Since we are returning here, we must call resetCollision again.
                 return true;
             }
-
             //If the ball hits the west area of the player, move the ball west.
             if(position.x < player.getPosition().x + PLAYER_WIDTH / 2){
-                velocity.x = -BALL_INITIAL_VELOCITY_X;
+                velocity.x = xMovementSpeedRatio * BALL_MOVEMENT_SPEED * REVERSE_MOVEMENT;
             }
             //Else the east side was hit, move the ball east.
             else {
-                velocity.x = BALL_INITIAL_VELOCITY_X;
+                velocity.x = xMovementSpeedRatio * BALL_MOVEMENT_SPEED ;
             }
             //Reset Collisions allows for collisions to occur again after a interval.
             resetCollision(COLLISION_RESET_TIMER);
@@ -130,7 +158,7 @@ public class Ball {
         }
         return false;
     }
-
+    //Adds velocity to the ball every time the update loop is called.
     private void addMovement(float delta){
         position.y += velocity.y * delta;
         position.x += velocity.x * delta;
@@ -147,5 +175,21 @@ public class Ball {
                 collision = false;
             }
         }, intervalSeconds);
+    }
+
+    /*
+    Checks if the ball has hit the side.
+    For the side of a brick to be hit, the ball has to be in taller than the bottom edge
+    of the brick, and shorter than the top of the brick. Also the ball must be less than or
+    greater than the length of the brick to actually hit the side.
+    Returns true if the side of the brick is hit
+    Returns false if the side was not hit.
+     */
+    boolean isHittingSideOfBrick(Rectangle rectangle){
+        if(position.y  > rectangle.y && position.y  < rectangle.y + BRICK_HEIGHT  && (position.x < rectangle.x || position.x > rectangle.x) ){
+            Gdx.app.log("BALL", "SIDE WAS HIT!!!");
+            return true;
+        }
+        return false;
     }
 }
