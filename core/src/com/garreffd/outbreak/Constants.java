@@ -28,9 +28,11 @@ public class Constants {
     public final static float BALL_POSITION_X = 0f;
     public final static float BALL_POSITION_Y_OFFSET = 2f;
 
-    public final static float BALL_MOVEMENT_SPEED = 5f;
+    public final static float BALL_MOVEMENT_SPEED = 4f;
     public final static float BALL_INITIAL_VELOCITY_Y = 5f;
-    public final static float BALL_INITIAL_VELOCITY_X = 0f;
+    public final static float BALL_INITIAL_VELOCITY_X = 5f;
+    public final static float BALL_INITIAL_SPEED_MODIFIER = 3f;
+
 
 
     public final static float BALL_RADIUS = 0.25f;
@@ -38,10 +40,26 @@ public class Constants {
     public final static Color BALL_COLOR = new Color(1f,1f,1f,1f);
 
     //Brick
-    public final static float BRICK_HEIGHT = 2f;
+    public final static float BRICK_HEIGHT = 0.5f;
+    public final static int BRICK_ROWS = 7;
+    public final static int BRICK_COLS = 10;
 
-    public final static int DIFFERENT_BRICK_COLORS = 3;
     public final static Color BRICK_COLOR_RED = new Color(1f,0f,0f,1f);
-    public final static Color BRICK_COLOR_GREEN = new Color(0f,1f,0f,1f);
+    public final static Color BRICK_COLOR_ORANGE = new Color(1f,0.5f,0f,1f);
+    public final static Color BRICK_COLOR_YELLOW = new Color(1f,1f,0f,1f);
+    public final static Color BRICK_COLOR_GREEN= new Color(0f,1f,0f,1f);
     public final static Color BRICK_COLOR_BLUE = new Color(0f,0f,1f,1f);
+    public final static Color BRICK_COLOR_INDIGO = new Color(0.29f,0f,0.52f,1f);
+    public final static Color BRICK_COLOR_VIOLET = new Color(0.58f,0f,0.82f,1f);
+
+    //TitleScreen.java
+
+    public final static float BUTTON_WIDTH = 3f;
+    public final static float BUTTON_HEIGHT = 1f;
+
+    public final static float PLAY_BUTTON_Y_OFFSET = 4f;
+    public final static String PLAY_LABEL = "Play";
+
+    public final static float TITLE_BUTTON_Y_OFFSET = 6f;
+    public final static String TITLE_LABEL = "Break-Out";
 }

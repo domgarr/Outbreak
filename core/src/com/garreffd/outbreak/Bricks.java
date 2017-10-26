@@ -3,7 +3,6 @@ package com.garreffd.outbreak;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.DelayedRemovalArray;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -52,8 +51,9 @@ public class Bricks {
         bricks = new DelayedRemovalArray<Brick>(false, numRows * cols);
 
         for(int row = 0; row < numRows; row++){
+           Color currentRowColor = getBrickColor(row);
             for(int col = 0; col < cols ; col++){
-                bricks.add(new Brick(col, col * BRICK_WIDTH , viewport.getWorldHeight() - (row * BRICK_HEIGHT),BRICK_WIDTH, BRICK_HEIGHT ,getRandomColor()) );
+                bricks.add(new Brick(col, col * BRICK_WIDTH , viewport.getWorldHeight() - (row * BRICK_HEIGHT),BRICK_WIDTH, BRICK_HEIGHT , currentRowColor) );
             }
         }
     }
@@ -88,13 +88,22 @@ public class Bricks {
         bricks.end();
     }
     /*
-    Returns a random Color.
+    Returns a color based on given index.
+    If 1 , red is returned
+    If 2, green is returned
+    If 3, blue is returned
+    Else White is returned by default.
      */
-    public Color getRandomColor(){
-        switch(MathUtils.random(Constants.DIFFERENT_BRICK_COLORS)){
-            case 1: return BRICK_COLOR_RED;
-            case 2: return BRICK_COLOR_GREEN;
-            case 3: return BRICK_COLOR_BLUE;
+    public Color getBrickColor(int index){
+
+        switch(index){
+            case 0: return BRICK_COLOR_RED;
+            case 1: return BRICK_COLOR_ORANGE;
+            case 2: return BRICK_COLOR_YELLOW;
+            case 3: return BRICK_COLOR_GREEN;
+            case 4: return BRICK_COLOR_BLUE;
+            case 5: return BRICK_COLOR_INDIGO;
+            case 6: return BRICK_COLOR_VIOLET;
         }
         return Color.WHITE;
     }

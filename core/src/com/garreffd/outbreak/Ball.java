@@ -27,6 +27,8 @@ public class Ball {
 
     private Vector2 position;
     private Vector2 velocity;
+    private float currentSpeedModifier;
+
     //Circle is used for checking for collisions with the player.
     private Circle circle;
     //Collision variables. This prevents multiple collisions after consecutive frames.
@@ -40,16 +42,23 @@ public class Ball {
         this.viewport = viewport;
         this.player = player;
 
-
+        currentSpeedModifier = BALL_INITIAL_SPEED_MODIFIER;
     }
 
     //Sets the Ball to be placed in the middle of the screen. The velocity is set to project upwards on start.
+    //Todo: Resizing screen causes ball to continue moving.So while resizing the ball needs to stop its motion.
+
     public void init(){
-        position = new Vector2(viewport.getWorldWidth() / 2, PLAYER_POSITION_Y + BALL_POSITION_Y_OFFSET);
-        velocity = new Vector2(0f, BALL_INITIAL_VELOCITY_Y);
+
+        if(position == null) {
+            position = new Vector2(viewport.getWorldWidth() / 2, PLAYER_POSITION_Y + BALL_POSITION_Y_OFFSET);
+        }
+        if(velocity == null) {
+            float initialXSpeed = MathUtils.random(-BALL_INITIAL_VELOCITY_X, BALL_INITIAL_VELOCITY_X);
+            velocity = new Vector2(initialXSpeed, BALL_INITIAL_VELOCITY_Y);
+        }
         circle = new Circle(position.x, position.y, BALL_RADIUS);
         collision = false;
-
     }
 
     //Draws the ball and sets the colour. Called in the Screen render function.
@@ -121,9 +130,9 @@ public class Ball {
             If it was negative make it positive.
              */
             if(velocity.y > 0) {
-                velocity.y = yMovementSpeedRatio * BALL_MOVEMENT_SPEED * REVERSE_MOVEMENT;
+                velocity.y = yMovementSpeedRatio * BALL_MOVEMENT_SPEED * REVERSE_MOVEMENT * currentSpeedModifier;
             }else{
-                velocity.y = yMovementSpeedRatio * BALL_MOVEMENT_SPEED ;
+                velocity.y = yMovementSpeedRatio * BALL_MOVEMENT_SPEED * currentSpeedModifier ;
             }
             //If we hit a brick, a few things differ.
             //1: If we hit any side, the ball should continue its trajectory. ie no change in velocity.y
@@ -135,9 +144,11 @@ public class Ball {
                         of a brick was hit, it should still continue to move in the same direction.
                         about the y-axis.
                         */
+
                         velocity.y *= REVERSE_MOVEMENT;
+                    Gdx.app.log("BALL SPEED", "" + Math.ceil(velocity.y) );
                         //Although the x-axis differs, there will always be a change in direction.
-                        velocity.x *= REVERSE_MOVEMENT;
+                        velocity.x *= REVERSE_MOVEMENT ;
                 }
                 //Reset Collisions allows for collisions to occur again after a interval.
                 resetCollision(COLLISION_RESET_TIMER);
@@ -185,8 +196,9 @@ public class Ball {
     Returns true if the side of the brick is hit
     Returns false if the side was not hit.
      */
+    //TODO There ball performs unexpectedly when hit the corner right corner( maybe left) of the brick.
     boolean isHittingSideOfBrick(Rectangle rectangle){
-        if(position.y  > rectangle.y && position.y  < rectangle.y + BRICK_HEIGHT  && (position.x < rectangle.x || position.x > rectangle.x) ){
+        if(position.y - BALL_RADIUS > rectangle.y && position.y + BALL_RADIUS  < rectangle.y + BRICK_HEIGHT  &&  ( position.x + BALL_RADIUS    < rectangle.x || position.x - BALL_RADIUS> rectangle.x + rectangle.width ) ){
             Gdx.app.log("BALL", "SIDE WAS HIT!!!");
             return true;
         }

@@ -18,7 +18,6 @@ import static com.garreffd.outbreak.Constants.*;
 
 public class OutbreakScreen extends InputAdapter implements Screen {
 
-    OutbreakGame game; //Will be used later to switch between screen.
     ExtendViewport outbreakViewport; //A viewport is the solution the different sized screens.
     ShapeRenderer renderer; // Will draw objects onto the screen.
 
@@ -26,8 +25,8 @@ public class OutbreakScreen extends InputAdapter implements Screen {
     Ball ball;
     Bricks bricks;
 
-    public OutbreakScreen(OutbreakGame game){
-        this.game = game;
+    public OutbreakScreen( ){
+
     }
 
     //Called when Screen gains focus.
@@ -59,7 +58,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
          */
         player = new Player(outbreakViewport);
         ball = new Ball(outbreakViewport, player);
-        bricks = new Bricks(outbreakViewport, 5, 10);
+        bricks = new Bricks(outbreakViewport, BRICK_ROWS, BRICK_COLS);
 
         /*
         InputProcessor recieves input event from the keyboard and touch screen.

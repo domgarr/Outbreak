@@ -11,11 +11,15 @@ public class OutbreakGame extends Game {
 	//Gets call once the application is created.
 	@Override
 	public void create() {
-		showOutbreakScreen();
+		showTitleScreen();
 	}
 
 	//Creates a new instance of OutBreakScreen and sets it to the current screen.
 	public void showOutbreakScreen(){
-		setScreen(new OutbreakScreen(this));
+		setScreen(new OutbreakScreen());
+	}
+
+	public void showTitleScreen(){
+		setScreen(new TitleScene(this));
 	}
 }
