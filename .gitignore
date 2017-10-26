@@ -28,6 +28,9 @@ android/gen/
 *.iml
 out/
 com_crashlytics_export_strings.xml
+!android/assets/raw/button*
+android/assets/raw/*
+
 
 ## Eclipse
 .classpath
