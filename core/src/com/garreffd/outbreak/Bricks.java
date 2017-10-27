@@ -76,11 +76,11 @@ public class Bricks {
         for(int i = 0; i < bricks.size ; i++){
             /*
                 We check for collision, by passing the brick collider and true. We pass true to
-                tell the method we are a brick, not the player. A brick has different mechanics
-                when hit, and is dealt with properly by checkPlayerCollision.
+                tell the method we are a brick, not the paddle. A brick has different mechanics
+                when hit, and is dealt with properly by checkPaddleCollision.
              */
-            if(ball.checkPlayerCollision(bricks.get(i).getBrickCollider(), true)){
-                //If checkPlayerCollision returns true, remove brick.
+            if(ball.checkBrickCollision(bricks.get(i).getBrickCollider())){
+                //If checkPaddleCollision returns true, remove brick.
                 bricks.removeIndex(i);
             }
         }

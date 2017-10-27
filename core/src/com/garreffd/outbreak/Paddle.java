@@ -14,14 +14,14 @@ import static com.garreffd.outbreak.Constants.*;
  * Created by Domenic on 2017-10-20.
  */
 
-public class Player {
+public class Paddle {
     public static float PLAYER_WIDTH_HALF = PLAYER_WIDTH / 2;
 
     private Vector2 position;
     private Viewport viewport;
 
 
-    public Player(Viewport viewport){
+    public Paddle(Viewport viewport){
         //Viewport contains information regarding world size.
         this.viewport = viewport;
         init();
@@ -29,15 +29,15 @@ public class Player {
 
     public void init(){
 
-        //Sets initial position of player.
+        //Sets initial position of paddle.
         position = new Vector2(viewport.getWorldWidth() / 2f - PLAYER_WIDTH_HALF, PLAYER_POSITION_Y);
     }
 
     public void update(float delta){
-        //If left arrow key is pressed, move player left.
+        //If left arrow key is pressed, move paddle left.
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && !atWestBoundary()){
             position.x -= delta * PLAYER_MOVEMENT_SPEED;
-        //If right arrow key is pressed, move player right.
+        //If right arrow key is pressed, move paddle right.
         }else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !atEastBoundary()){
             position.x += delta * PLAYER_MOVEMENT_SPEED;
         }
@@ -62,9 +62,9 @@ public class Player {
     }
 
     /*
-    Check if the player doesn't leave the boundary to the east.
-    Returns true if player is at the west bound.
-    Returns false if player is anywhere but the west bound.
+    Check if the paddle doesn't leave the boundary to the east.
+    Returns true if paddle is at the west bound.
+    Returns false if paddle is anywhere but the west bound.
     */
     public boolean atWestBoundary(){
         if(position.x  < 0  ){
@@ -74,9 +74,9 @@ public class Player {
     }
 
     /*
-     Ensure player doesn't leave the boundary through the east.
-     Returns true if the player is at the east bound.
-     Returns false if the player is anywhere but the east bound.
+     Ensure paddle doesn't leave the boundary through the east.
+     Returns true if the paddle is at the east bound.
+     Returns false if the paddle is anywhere but the east bound.
      */
     public boolean atEastBoundary(){
         if(position.x > viewport.getWorldWidth() - PLAYER_WIDTH   ){
@@ -86,31 +86,31 @@ public class Player {
     }
 
     /*
-    When the ball hits the player's paddle the trajectory of the ball depends on the distance between
-    the ball and player. The angle is clamped between two values returning a float
+    When the ball hits the paddle's paddle the trajectory of the ball depends on the distance between
+    the ball and paddle. The angle is clamped between two values returning a float
     between BALL_TRAJECTORY_MIN_ANGLE and BALL_TRAJECTORY_MAX_ANGLE Constants. The MAX_ANGLE constant is reached the ball hits exactly
     the center.
     1st parameter: Balls X position.
     Returns: A value between BALL_TRAJECTORY_MIN_ANGLE and BALL_TRAJECTORY_MAX_ANGLE
      */
     public float getCollidingTrajectory(float ballPositionX){
-        /* Gets distance between Player and Ball. Set the Y positions to 0, because
+        /* Gets distance between Paddle and Ball. Set the Y positions to 0, because
             I don't want the Y-axis effecting the horizontal distance.
         */
         float distanceBtwPlayerAndBall = new Vector2(position.x + PLAYER_WIDTH_HALF,0).dst(new Vector2(ballPositionX, 0));
 
-        /* Gets the progress - the ratio between max and min distance the ball can be from the player's center
-        for example, If the distance is 2 from a player with WIDTH_HALF of 2, the ratio is 1.
+        /* Gets the progress - the ratio between max and min distance the ball can be from the paddle's center
+        for example, If the distance is 2 from a paddle with WIDTH_HALF of 2, the ratio is 1.
         */
         float progress = distanceBtwPlayerAndBall / PLAYER_WIDTH_HALF;
 
         /*
         We use lerp here to linearly interpolate between two angles we want the ball to project after
-        hitting the player.
+        hitting the paddle.
         The first parameter is the fromValue. We set it to the MAX_BALL_ANGLE so that if the ball hits
-         the center of the player, it has a high angle.
+         the center of the paddle, it has a high angle.
         The second parameter is the toValue, for reasons opposite of the first value, we set it to MIN_BALL_ANGLE
-        The third parameter is progress. We use Math.Min() in case the ball hits the side of the player
+        The third parameter is progress. We use Math.Min() in case the ball hits the side of the paddle
             whic would result in progress grater than 1 and since progress is a ratio that can't happen.
          */
         return MathUtils.lerp(BALL_TRAJECTORY_MAX_ANGLE, BALL_TRAJECTORY_MIN_ANGLE, Math.min(1, progress));

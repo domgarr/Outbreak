@@ -16,7 +16,7 @@ public class OutbreakGame extends Game {
 
 	//Creates a new instance of OutBreakScreen and sets it to the current screen.
 	public void showOutbreakScreen(){
-		setScreen(new OutbreakScreen());
+		setScreen(new OutbreakScreen(this));
 	}
 
 	public void showTitleScreen(){

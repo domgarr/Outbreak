@@ -21,12 +21,13 @@ public class OutbreakScreen extends InputAdapter implements Screen {
     ExtendViewport outbreakViewport; //A viewport is the solution the different sized screens.
     ShapeRenderer renderer; // Will draw objects onto the screen.
 
-    Player player;
+    OutbreakGame game;
+    Paddle paddle;
     Ball ball;
     Bricks bricks;
 
-    public OutbreakScreen( ){
-
+    public OutbreakScreen(OutbreakGame game ){
+        this.game = game;
     }
 
     //Called when Screen gains focus.
@@ -53,11 +54,11 @@ public class OutbreakScreen extends InputAdapter implements Screen {
         renderer.setAutoShapeType(true);
 
         /*
-        Initialize new player passing in the viewport. Passing in the viewport allows for positioning
-        of the player in the middle of the screen, since viewport contains the viewportWidth.
+        Initialize new paddle passing in the viewport. Passing in the viewport allows for positioning
+        of the paddle in the middle of the screen, since viewport contains the viewportWidth.
          */
-        player = new Player(outbreakViewport);
-        ball = new Ball(outbreakViewport, player);
+        paddle = new Paddle(outbreakViewport);
+        ball = new Ball(game, outbreakViewport, paddle);
         bricks = new Bricks(outbreakViewport, BRICK_ROWS, BRICK_COLS);
 
         /*
@@ -73,7 +74,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
      */
     @Override
     public void render(float delta) {
-        player.update(delta);
+        paddle.update(delta);
         ball.update(delta);
         bricks.update(ball);
 
@@ -101,8 +102,8 @@ public class OutbreakScreen extends InputAdapter implements Screen {
 
         //Combines View and Projection matrices into one.
         renderer.setProjectionMatrix(outbreakViewport.getCamera().combined);
-        //Draws player on screen.
-        player.render(renderer);
+        //Draws paddle on screen.
+        paddle.render(renderer);
         ball.render(renderer);
         bricks.render(renderer);
 
@@ -116,7 +117,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
         //Whenever a resize occurs the viewport must be modified.
         outbreakViewport.update(width, height, true);
 
-        player.init();
+        paddle.init();
         ball.init();
         bricks.init();
     }

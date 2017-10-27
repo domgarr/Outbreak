@@ -11,27 +11,29 @@ public class Constants {
     public final static float WORLD_WIDTH = 10f;
     final static Color BACKGROUND_COLOR = new Color(0f,0f,0f,1f);
 
-    //Player
+    //Paddle
     public final static float PLAYER_POSITION_X = 0f;
     public final static float PLAYER_POSITION_Y = 1f;
     public final static float PLAYER_MOVEMENT_SPEED = 5f;
 
     public final static Color PLAYER_COLOR = new Color(1f,1f,1f,1f);
-    public final static float PLAYER_WIDTH = 3f;
+    public final static float PLAYER_WIDTH = 2f;
     public final static float PLAYER_HEIGHT = 0.5f;
 
     public final static float BALL_TRAJECTORY_MIN_ANGLE = 0.25f;
-    public final static float BALL_TRAJECTORY_MAX_ANGLE = 0.85f;
+    public final static float BALL_TRAJECTORY_MAX_ANGLE = 0.90f;
 
 
     //Ball
     public final static float BALL_POSITION_X = 0f;
     public final static float BALL_POSITION_Y_OFFSET = 2f;
 
-    public final static float BALL_MOVEMENT_SPEED = 4f;
+    public final static float BALL_INITIAL_SPEED = 5f;
+    public final static float BALL_SPEED_MODIFIER = 0f;
+
     public final static float BALL_INITIAL_VELOCITY_Y = 5f;
     public final static float BALL_INITIAL_VELOCITY_X = 5f;
-    public final static float BALL_INITIAL_SPEED_MODIFIER = 3f;
+
 
 
 
