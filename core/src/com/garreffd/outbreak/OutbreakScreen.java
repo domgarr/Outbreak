@@ -3,9 +3,22 @@ package com.garreffd.outbreak;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
 import static com.garreffd.outbreak.Constants.*;
 /*Note the static import prevents me from having to explicitly type Constants every time I want to
  access a constant.
@@ -25,6 +38,15 @@ public class OutbreakScreen extends InputAdapter implements Screen {
     Paddle paddle;
     Ball ball;
     Bricks bricks;
+
+    Stage stage;
+    Table table;
+    Skin skin;
+
+    Label score;
+    Label money;
+
+    boolean paused = false;
 
     public OutbreakScreen(OutbreakGame game ){
         this.game = game;
@@ -57,9 +79,9 @@ public class OutbreakScreen extends InputAdapter implements Screen {
         Initialize new paddle passing in the viewport. Passing in the viewport allows for positioning
         of the paddle in the middle of the screen, since viewport contains the viewportWidth.
          */
-        paddle = new Paddle(outbreakViewport);
+        paddle = new Paddle(this, outbreakViewport);
         ball = new Ball(game, outbreakViewport, paddle);
-        bricks = new Bricks(outbreakViewport, BRICK_ROWS, BRICK_COLS);
+        bricks = new Bricks(paddle, outbreakViewport, BRICK_ROWS, BRICK_COLS);
 
         /*
         InputProcessor recieves input event from the keyboard and touch screen.
@@ -68,15 +90,61 @@ public class OutbreakScreen extends InputAdapter implements Screen {
          */
         Gdx.input.setInputProcessor(this);
 
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+        skin = new Skin(Gdx.files.internal("skin/clean-crispy-ui.json"));
+
+        table = new Table();
+        table.setWidth(stage.getWidth());
+        table.setHeight(1f);
+        table.align(Align.center | Align.top);
+        table.setPosition(0, Gdx.graphics.getHeight());
+
+        final TextButton pauseButton = new TextButton("||", skin);
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                paused = !paused;
+            }
+        });
+
+        FileHandle fileArial21 = Gdx.files.internal("fonts/arial-black-21.fnt");
+        BitmapFont fontArial21 = new BitmapFont(fileArial21);
+        skin.add("arial-21", fontArial21, BitmapFont.class);
+
+        Label.LabelStyle label = new Label.LabelStyle(fontArial21, new Color(1f,1f,1f,1f));
+
+        score = new Label("Score: ", skin);
+        score.setStyle(label);
+
+        money = new Label("Money: ", skin);
+        money.setStyle(label);
+
+        table.add(money).padRight(50f);
+        table.add(pauseButton).width(35f).height(Gdx.graphics.getHeight() / 20 );
+        table.add(score).padLeft(50f);
+
+        updateGui(0,0);
+
+        stage.addActor(table);
+
+        outbreakViewport.apply(true);
     }
     /*
     Called by game loop everytime rendering needs to be done. Game logic should be performed here.
      */
     @Override
     public void render(float delta) {
-        paddle.update(delta);
-        ball.update(delta);
-        bricks.update(ball);
+        if(paused){
+            Gdx.gl.glClearColor(BACKGROUND_COLOR.r, BACKGROUND_COLOR.g, BACKGROUND_COLOR.b, BACKGROUND_COLOR.a);
+            //Note that this is a 2D game, clearing the DEPTH_BUFFER_BIT isn't necessary.
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+            stage.draw();
+
+        }else {
+            paddle.update(delta);
+            ball.update(delta);
+            bricks.update(ball);
 
         /*
         Calling apply with no parameters will apply the view port without centering the camera.
@@ -85,7 +153,6 @@ public class OutbreakScreen extends InputAdapter implements Screen {
         glViewport is in screen pixel units. Its responsible for telling which part of the window
         will be used for rendering.
          */
-        outbreakViewport.apply(true);
 
         /*
         Clear the screen.
@@ -95,18 +162,20 @@ public class OutbreakScreen extends InputAdapter implements Screen {
          we prevent any oddities.
          */
 
-        //Sets background to black.
-        Gdx.gl.glClearColor(BACKGROUND_COLOR.r, BACKGROUND_COLOR.g, BACKGROUND_COLOR.b, BACKGROUND_COLOR.a);
-        //Note that this is a 2D game, clearing the DEPTH_BUFFER_BIT isn't necessary.
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+            //Sets background to black.
+            Gdx.gl.glClearColor(BACKGROUND_COLOR.r, BACKGROUND_COLOR.g, BACKGROUND_COLOR.b, BACKGROUND_COLOR.a);
+            //Note that this is a 2D game, clearing the DEPTH_BUFFER_BIT isn't necessary.
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        //Combines View and Projection matrices into one.
-        renderer.setProjectionMatrix(outbreakViewport.getCamera().combined);
-        //Draws paddle on screen.
-        paddle.render(renderer);
-        ball.render(renderer);
-        bricks.render(renderer);
+            //Combines View and Projection matrices into one.
+            renderer.setProjectionMatrix(outbreakViewport.getCamera().combined);
+            //Draws paddle on screen.
+            paddle.render(renderer);
+            ball.render(renderer);
+            bricks.render(renderer);
 
+            stage.draw();
+        }
     }
 
     /*
@@ -116,6 +185,7 @@ public class OutbreakScreen extends InputAdapter implements Screen {
     public void resize(int width, int height) {
         //Whenever a resize occurs the viewport must be modified.
         outbreakViewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
 
         paddle.init();
         ball.init();
@@ -143,6 +213,12 @@ public class OutbreakScreen extends InputAdapter implements Screen {
     //Called when application is destroyed. Note that pause() is called before dispose()
     @Override
     public void dispose() {
-
+        stage.dispose();
     }
+
+    public void updateGui(int points, int money){
+            this.score.setText("Score: " + points);
+            this.money.setText("Money: " +  money);
+            }
+
 }

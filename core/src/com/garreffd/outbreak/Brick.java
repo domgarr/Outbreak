@@ -27,6 +27,8 @@ public class Brick {
     private float width,height;
     private Color color;
     private Rectangle rectangle;
+    private int money = 2;
+    private int points = 3;
 
     public Brick(int rowNumber, float x, float y, float width, float height, Color color){
         position = new Vector2(x, y);
@@ -36,6 +38,22 @@ public class Brick {
         this.color = color;
 
         rectangle = new Rectangle(x,y,width,height);
+    }
+
+
+    public Brick(int x, int y, int width , int height){
+        rectangle = new Rectangle(x, y, width, height);
+        position = new Vector2(x,y);
+        this.width = width;
+        this.height = height;
+
+        this.color = Color.WHITE;
+    }
+
+    public void update(Ball ball){
+        if(ball.checkBrickCollision(rectangle)){
+
+        }
     }
 
     public void render(ShapeRenderer renderer){
@@ -69,6 +87,23 @@ public class Brick {
         return rowNumber;
     }
 
+    public int getMoney() {
+        return money;
+    }
 
+    public int getPoints() {
+        return points;
+    }
 
+    public Vector2 getPosition() {
+        return position;
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
+    }
 }

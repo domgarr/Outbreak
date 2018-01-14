@@ -2,6 +2,7 @@ package com.garreffd.outbreak;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -19,12 +20,22 @@ public class Paddle {
 
     private Vector2 position;
     private Viewport viewport;
+    private OutbreakScreen outbreakScreen;
+
+    private int money;
+    private int score;
+    private int highScore;
 
 
-    public Paddle(Viewport viewport){
+    public Paddle(OutbreakScreen outbreakScreen, Viewport viewport){
         //Viewport contains information regarding world size.
         this.viewport = viewport;
+        this.outbreakScreen = outbreakScreen;
         init();
+
+        money = 0;
+        score = 0;
+        highScore = 0;
     }
 
     public void init(){
@@ -114,6 +125,28 @@ public class Paddle {
             whic would result in progress grater than 1 and since progress is a ratio that can't happen.
          */
         return MathUtils.lerp(BALL_TRAJECTORY_MAX_ANGLE, BALL_TRAJECTORY_MIN_ANGLE, Math.min(1, progress));
-
     }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void setMoney(int money) {
+        this.money += money;
+    }
+
+    public void setScore(int score) {
+        this.score += score;
+    }
+
+    public void setHighScore(int highScore) {
+        this.highScore = highScore;
+    }
+
+    public void updateGui(){
+        if(outbreakScreen != null) {
+            outbreakScreen.updateGui(score, money);
+        }
+    }
+
 }

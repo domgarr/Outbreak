@@ -19,6 +19,8 @@ public class Ball {
     private final int FORWARD_MOVEMENT = 1;
     private final int REVERSE_MOVEMENT = -1;
 
+    private final int NEGATE_MOVEMENT = -1;
+
     private OutbreakGame game;
     private Paddle paddle;
 
@@ -40,7 +42,7 @@ public class Ball {
     private Circle circle;
     //Collision variables. This prevents multiple collisions after consecutive frames.
     private boolean collision;
-    private final static float COLLISION_RESET_TIMER = 0.001f;
+    private final static float COLLISION_RESET_TIMER = 0.01f;
 
     public Ball(OutbreakGame game, Viewport viewport, Paddle paddle){
         this.game = game;
@@ -70,6 +72,9 @@ public class Ball {
         renderer.setColor(BALL_COLOR);
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.circle(position.x, position.y, BALL_RADIUS, BALL_SEGMENTS);
+        renderer.set(ShapeRenderer.ShapeType.Point);
+        renderer.point(position.x, position.y , 0);
+
         renderer.end();
     }
 
@@ -93,11 +98,11 @@ public class Ball {
     private void checkBounds(){
         //If the ball is greater than the height of the map, reverse the velocity.y
         if(position.y + BALL_RADIUS > viewport.getWorldHeight() && !collision){
-            changeVerticalDirection();
+            changeVerticalDirection(NEGATE_MOVEMENT);
         }
         // If the ball hits any walls, reverse velocity.x
         else if( position.x - BALL_RADIUS < 0 || position.x + BALL_RADIUS > viewport.getWorldWidth() && !collision) {
-            changeHorizontalDirection();
+            changeHorizontalDirection(NEGATE_MOVEMENT);
         //If the ball moves below the paddle, the game is over.
         }else if(position.y < 0){
             //For now reset ball when out of Y bounds.
@@ -116,7 +121,7 @@ public class Ball {
         vertical movement doesn't change, and the horizontal movement does change.
          */
         if(Intersector.overlaps(circle,paddle) && !collision){
-            changeVerticalDirection();
+            changeVerticalDirection(FORWARD_MOVEMENT);
             //Sets the x and y ratio variables proportionally to the distance from the center of the paddle.
             float yMovementSpeedRatio = this.paddle.getCollidingTrajectory(position.x);
             float xMovementSpeedRatio = 1 - yMovementSpeedRatio;
@@ -169,29 +174,30 @@ public class Ball {
             //Check if the side was hit.
             if (isHittingSideOfBrick(brick)) {
                 //Right side collision of brick
-                if (position.x > brick.x + brick.width) {
+                if (isHittingRightSide(brick)) {
                     position.x = brick.x + brick.width + BALL_RADIUS;
-                    horizontalBallDirection = FORWARD_MOVEMENT;
-                    velocity.x = Math.abs(velocity.x);
+                    changeHorizontalDirection(FORWARD_MOVEMENT);
+                    //velocity.x = Math.abs(velocity.x);
+                    Gdx.app.log("BALL", "HITTING RIGHT SIDE");
                 }
                 //Left side collision of brick
-                else if (position.x + BALL_RADIUS > brick.x) {
+                else if (isHittingLeftSide(brick)) {
+                    Gdx.app.log("BALL", "HITTING LEFT SIDE");
                     position.x = brick.x - BALL_RADIUS;
-                    horizontalBallDirection = REVERSE_MOVEMENT;
-                    velocity.x = velocity.x * horizontalBallDirection;
+                    changeHorizontalDirection(REVERSE_MOVEMENT);
+                    //velocity.x = velocity.x * horizontalBallDirection;
                 }
             } else {
                 //Top of brick hit.
-                if(position.y - BALL_RADIUS > brick.y + brick.width){
-                    position.y = brick.y + brick.width + BALL_RADIUS;
-                    verticalBallDirection = FORWARD_MOVEMENT;
-                    velocity.y = Math.abs(velocity.y);
+                if(isHittingTopSide(brick)){
+                    position.y = brick.y + brick.height + BALL_RADIUS;
+                    changeVerticalDirection(FORWARD_MOVEMENT);
+                    Gdx.app.log("BALL", "HITTING TOP SIDE");
                 }
                 //Bottom of brick hit.
-                else if (position.y + BALL_RADIUS > brick.y) {
+                else if (isHittingBottomSide(brick)) {
                     position.y = brick.y - BALL_RADIUS;
-                    verticalBallDirection = REVERSE_MOVEMENT;
-                    velocity.y = velocity.y * verticalBallDirection;
+                    changeVerticalDirection(REVERSE_MOVEMENT);
                 }
             }
             //Return true, collision occured.
@@ -230,22 +236,21 @@ public class Ball {
     Returns false if the side was not hit.
      */
     //TODO There ball performs unexpectedly when hit the corner right corner( maybe left) of the brick.
-    boolean isHittingSideOfBrick(Rectangle rectangle){
+    boolean isHittingSideOfBrick(Rectangle brick){
         //Check if between height of brick
-        if( position.y + BALL_RADIUS  > rectangle.y && position.y - BALL_RADIUS < rectangle.y + rectangle.height ){
-            if(position.x - BALL_RADIUS   < rectangle.x || position.x + BALL_RADIUS  > rectangle.x + rectangle.width) {
+        if( isBelowBrick(brick) && isAboveBrick(brick) ){
                 Gdx.app.log("BALL", "SIDE OF BRICK HIT");
                 return true;
-            }
         }
         return false;
     }
 
-    private void changeVerticalDirection(){
+
+    private void changeVerticalDirection(int direction){
         collision = true;
+        verticalBallDirection = direction;
 
         currentSpeedModifier += BALL_SPEED_MODIFIER;
-        verticalBallDirection *= -1;
         velocity.y = verticalBallDirection * currentSpeedModifier;
 
         if(position.y > viewport.getWorldHeight() + BALL_RADIUS) {
@@ -254,22 +259,56 @@ public class Ball {
         resetCollision(COLLISION_RESET_TIMER);
     }
 
-    private void changeHorizontalDirection(){
+    private void changeHorizontalDirection(int direction){
         collision = true;
-
+        horizontalBallDirection = direction;
 
         if(position.x - BALL_RADIUS < 0){
             position.x = BALL_RADIUS;
+            horizontalBallDirection = FORWARD_MOVEMENT;
         }else if(position.x + BALL_RADIUS > viewport.getWorldWidth()){
             position.x = viewport.getWorldWidth() - BALL_RADIUS;
+            horizontalBallDirection = REVERSE_MOVEMENT;
         }
 
         currentSpeedModifier += BALL_SPEED_MODIFIER;
-        horizontalBallDirection *= -1;
         velocity.x = horizontalBallDirection * currentSpeedModifier;
 
         resetCollision(COLLISION_RESET_TIMER);
+    }
 
+    //private void checkSideBoundsAnd
 
+    public void setPosition(Vector2 position) {
+        this.position = position;
+    }
+
+    private boolean isAboveBrick(Rectangle brick) {
+
+        return position.y  >= brick.y;
+    }
+
+    private boolean isBelowBrick(Rectangle brick){
+        return position.y  <= brick.y + brick.getHeight();
+    }
+
+    private boolean isHittingLeftSide(Rectangle brick){
+        return position.x < brick.x;
+    }
+
+    private boolean isHittingRightSide(Rectangle brick){
+        return position.x > brick.x + brick.width;
+    }
+
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
+    }
+
+    private boolean isHittingTopSide(Rectangle brick){
+        return position.y > brick.y + brick.height;
+    }
+
+    private boolean isHittingBottomSide(Rectangle brick){
+        return position.y < brick.y;
     }
 }

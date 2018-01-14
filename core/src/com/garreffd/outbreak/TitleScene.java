@@ -124,7 +124,7 @@ public class TitleScene implements Screen {
         table.row();
         table.add(quitButton).width(buttonWidth).height(buttonHeight);
 
-        MyActor actor = new MyActor();
+
 
         stage.addActor(table);
 

@@ -1,3 +1,6 @@
+//TODO: Add accelermoter functionality or arrows for moving paddle on android.
+//TODO: ADD GUI to top of screen for score and money.
+
 package com.garreffd.outbreak;
 
 import com.badlogic.gdx.graphics.Color;
@@ -45,6 +48,7 @@ public class Constants {
     public final static float BRICK_HEIGHT = 0.5f;
     public final static int BRICK_ROWS = 7;
     public final static int BRICK_COLS = 10;
+    public final static float BRICK_OFFSET_FROM_TOP = 1f;
 
     public final static Color BRICK_COLOR_RED = new Color(1f,0f,0f,1f);
     public final static Color BRICK_COLOR_ORANGE = new Color(1f,0.5f,0f,1f);

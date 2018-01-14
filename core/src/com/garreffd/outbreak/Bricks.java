@@ -23,10 +23,11 @@ public class Bricks {
     private DelayedRemovalArray<Brick> bricks;
     private int numRows;
     private int cols;
-
     private Viewport viewport;
+    private Paddle paddle;
 
-    public Bricks(Viewport viewport, int numRows, int numCols){
+    public Bricks(Paddle paddle, Viewport viewport, int numRows, int numCols){
+        this.paddle = paddle;
         this.viewport = viewport;
         this.numRows = numRows;
         this.cols = numCols;
@@ -53,7 +54,7 @@ public class Bricks {
         for(int row = 0; row < numRows; row++){
            Color currentRowColor = getBrickColor(row);
             for(int col = 0; col < cols ; col++){
-                bricks.add(new Brick(col, col * BRICK_WIDTH , viewport.getWorldHeight() - (row * BRICK_HEIGHT),BRICK_WIDTH, BRICK_HEIGHT , currentRowColor) );
+                bricks.add(new Brick(col, col * BRICK_WIDTH , viewport.getWorldHeight() - BRICK_OFFSET_FROM_TOP - (row * BRICK_HEIGHT),BRICK_WIDTH, BRICK_HEIGHT , currentRowColor) );
             }
         }
     }
@@ -81,7 +82,12 @@ public class Bricks {
              */
             if(ball.checkBrickCollision(bricks.get(i).getBrickCollider())){
                 //If checkPaddleCollision returns true, remove brick.
+                Brick brick = bricks.get(i);
+                paddle.setMoney(brick.getMoney());
+                paddle.setScore(brick.getPoints());
+                paddle.updateGui();
                 bricks.removeIndex(i);
+
             }
         }
         //The items aren't actually removed until end() is called.
@@ -89,9 +95,6 @@ public class Bricks {
     }
     /*
     Returns a color based on given index.
-    If 1 , red is returned
-    If 2, green is returned
-    If 3, blue is returned
     Else White is returned by default.
      */
     public Color getBrickColor(int index){
